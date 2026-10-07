@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import AuthPanel from '@/components/AuthPanel'
 import { supabase } from '@/lib/supabase'
 
 type Note = {
@@ -116,6 +117,8 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
+      <AuthPanel />
+
       <View style={styles.row}>
         <TextInput
           style={styles.input}
