@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import AuthPanel from '@/components/AuthPanel'
@@ -16,9 +16,32 @@ export default function Index() {
   // null = adding a new note; a number = editing that note's id
   const [editingId, setEditingId] = useState<number | null>(null)
 
+  // undefined = auth not checked yet; null = logged out; string = logged-in user's id
+  const [userId, setUserId] = useState<string | null | undefined>(undefined)
+  const lastUserId = useRef<string | null | undefined>(undefined)
+
   useEffect(() => {
-    fetchNotes()
+    // INITIAL_SESSION fires on mount (with the restored session, if any), then
+    // SIGNED_IN / SIGNED_OUT as the user logs in and out.
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextUserId = session?.user.id ?? null
+      if (lastUserId.current !== nextUserId) {
+        // A different user (or none) is now logged in: drop any in-progress edit.
+        setError(null)
+        setEditingId(null)
+        setText('')
+      }
+      lastUserId.current = nextUserId
+      setUserId(nextUserId)
+    })
+    return () => data.subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (userId === undefined) return // wait until we know who (if anyone) is logged in
+    // Refetch whenever the logged-in user changes, so notes reflect the new session.
+    fetchNotes()
+  }, [userId])
 
   async function fetchNotes() {
     const { data, error } = await supabase
