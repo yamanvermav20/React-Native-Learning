@@ -27,9 +27,9 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
- 
-      <Stack.Protected guard={!session}> {/* When the user is not logged in (sessions is null and !session = true)*/}
-        <Stack.Screen name="(auth)" />    
+
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" />
       </Stack.Protected>
 
       <Stack.Protected guard={!!session}>
